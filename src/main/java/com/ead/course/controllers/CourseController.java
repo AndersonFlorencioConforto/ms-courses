@@ -3,8 +3,13 @@ package com.ead.course.controllers;
 import com.ead.course.dtos.CourseDTO;
 import com.ead.course.models.CourseModel;
 import com.ead.course.services.CourseService;
+import com.ead.course.specifications.SpecificationTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +21,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/courses")
-@CrossOrigin(origins = "*",maxAge = 3600)
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class CourseController {
 
     @Autowired
@@ -25,13 +30,13 @@ public class CourseController {
     @PostMapping
     public ResponseEntity<Object> saveCourse(@Valid @RequestBody CourseDTO courseDTO) {
         var courseModel = new CourseModel();
-        BeanUtils.copyProperties(courseDTO,courseModel);
+        BeanUtils.copyProperties(courseDTO, courseModel);
         CourseModel save = courseService.save(courseModel);
         return ResponseEntity.status(HttpStatus.CREATED).body(save);
     }
 
     @DeleteMapping(value = "/{courseId}")
-    public ResponseEntity<Object> deleteCourse(@PathVariable (value = "courseId")UUID courseId) {
+    public ResponseEntity<Object> deleteCourse(@PathVariable(value = "courseId") UUID courseId) {
         Optional<CourseModel> findById = courseService.findById(courseId);
         if (!findById.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course Not Found");
@@ -41,7 +46,7 @@ public class CourseController {
     }
 
     @PutMapping(value = "/{courseId}")
-    public ResponseEntity<Object> updateCourse(@PathVariable (value = "courseId")UUID courseId,@Valid @RequestBody CourseDTO courseDTO) {
+    public ResponseEntity<Object> updateCourse(@PathVariable(value = "courseId") UUID courseId, @Valid @RequestBody CourseDTO courseDTO) {
         Optional<CourseModel> findById = courseService.findById(courseId);
         if (!findById.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course Not Found");
@@ -56,12 +61,17 @@ public class CourseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CourseModel>> findAllCourse() {
-        return ResponseEntity.ok().body(courseService.findAll());
+    public ResponseEntity<Page<CourseModel>> findAllCourse(SpecificationTemplate.CourseSpec spec,
+            @PageableDefault(
+                    page = 0,
+                    size = 10,
+                    sort = "courseId",
+                    direction = Sort.Direction.ASC) Pageable pageable) {
+        return ResponseEntity.ok().body(courseService.findAll(spec,pageable));
     }
 
     @GetMapping(value = "/{courseId}")
-    public ResponseEntity<Object> findById(@PathVariable (value = "courseId")UUID courseId) {
+    public ResponseEntity<Object> findById(@PathVariable(value = "courseId") UUID courseId) {
         Optional<CourseModel> findById = courseService.findById(courseId);
         if (!findById.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course Not Found");
