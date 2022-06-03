@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @Log4j2
 @Component
-public class UserClient {
+public class AuthUserClient {
 
     @Autowired
     private RestTemplate restTemplate;
@@ -30,7 +30,7 @@ public class UserClient {
     public Page<UserDTO> getAllUsersByCourseId(UUID courseId, Pageable pageable) {
         List<UserDTO> searchResult = null;
         ResponseEntity<ResponsePageDTO<UserDTO>> result = null;
-        String url = utilsService.createUrl(courseId,pageable);
+        String url = utilsService.getAllUsersByCourseId(courseId,pageable);
         log.debug("Request URL : {}" , url);
         log.info("Request URL : {}" , url);
         try {
@@ -42,6 +42,13 @@ public class UserClient {
             log.error("Error request /courses {}", e);
         }
         log.info("Ending request /courses userId {}" , courseId);
+        return result.getBody();
+    }
+
+
+    public UserDTO findUserById(UUID userId) {
+        String url = utilsService.findUserById(userId);
+        ResponseEntity<UserDTO> result = restTemplate.exchange(url, HttpMethod.GET, null, UserDTO.class);
         return result.getBody();
     }
 
