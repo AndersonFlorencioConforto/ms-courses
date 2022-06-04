@@ -1,5 +1,6 @@
 package com.ead.course.services;
 
+import com.ead.course.dtos.CourseDTO;
 import com.ead.course.models.CourseModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,8 +11,9 @@ import java.util.UUID;
 
 public interface CourseService {
 
-    void delete(CourseModel courseModel);
-    CourseModel save(CourseModel courseModel);
+    void delete(UUID courseId);
+    CourseModel save(CourseDTO courseDTO);
     Optional<CourseModel> findById(UUID courseId);
     Page<CourseModel> findAll(Specification<CourseModel> spec, Pageable pageable);
+    CourseModel update(UUID courseId, CourseDTO courseDTO);
 }

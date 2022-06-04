@@ -15,9 +15,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,9 +31,6 @@ public class ModuleController {
     @PostMapping(value = "/courses/{courseId}/modules")
     public ResponseEntity<Object> saveModule(@Valid @RequestBody ModuleDTO moduleDTO, @PathVariable (value = "courseId") UUID courseId) {
         Optional<CourseModel> findById = courseService.findById(courseId);
-        if (!findById.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course Not Found");
-        }
         var moduleModel = new ModuleModel();
         BeanUtils.copyProperties(moduleDTO,moduleModel);
         moduleModel.setCourse(findById.get());
