@@ -4,7 +4,6 @@ import com.ead.course.services.UtilsService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.util.UUID;
 
 @Service
@@ -24,5 +23,10 @@ public class UtilsServiceImpl implements UtilsService {
     @Override
     public String findUserById(UUID userId) {
         return REQUEST_URL_AUTHUSER + "/users/" + userId;
+    }
+
+    @Override
+    public String postSubscriptionUserInCourse(UUID userId) {
+      return REQUEST_URL_AUTHUSER + "/users/" + userId + "/courses/subscription";
     }
 }

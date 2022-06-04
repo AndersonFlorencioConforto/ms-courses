@@ -1,8 +1,10 @@
 package com.ead.course.client;
 
 import com.ead.course.dtos.ResponsePageDTO;
+import com.ead.course.dtos.UserCourseDTO;
 import com.ead.course.dtos.UserDTO;
 import com.ead.course.services.UtilsService;
+import com.ead.course.services.exceptions.ClientException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import java.util.List;
@@ -50,6 +53,19 @@ public class AuthUserClient {
         String url = utilsService.findUserById(userId);
         ResponseEntity<UserDTO> result = restTemplate.exchange(url, HttpMethod.GET, null, UserDTO.class);
         return result.getBody();
+    }
+
+
+    public void postSubscriptionUserInCourse(UUID courseId,UUID userId){
+        try {
+            String url = utilsService.postSubscriptionUserInCourse(userId);
+            UserCourseDTO userCourseDTO = new UserCourseDTO();
+            userCourseDTO.setCourseId(courseId);
+            userCourseDTO.setUserId(userId);
+            restTemplate.postForObject(url,userCourseDTO,String.class);
+        } catch (HttpClientErrorException e) {
+            throw new ClientException(e.getMessage());
+        }
     }
 
 }

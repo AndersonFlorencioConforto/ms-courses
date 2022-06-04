@@ -12,7 +12,9 @@ import com.ead.course.services.exceptions.ConflictException;
 import com.ead.course.services.exceptions.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpStatusCodeException;
+
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,11 +31,12 @@ public class CourseUserServiceImpl implements CourseUserService {
         this.authUserClient = authUserClient;
     }
 
+    @Transactional
     @Override
     public CourseUserModel save(UUID userId, UUID courseId) {
         Optional<CourseModel> course = courseService.findById(courseId);
         CourseModel obj = course.orElseThrow(() -> new ResourceNotFoundException("Course not found"));
-        if(courseUserRepository.existsByCourseAndUserId(obj,userId)){
+        if (courseUserRepository.existsByCourseAndUserId(obj, userId)) {
             throw new ConflictException("Error : subscription already exists!");
         }
         try {
@@ -41,12 +44,14 @@ public class CourseUserServiceImpl implements CourseUserService {
             if (userResponse.getUserStatus().equals(UserStatus.BLOCKED)) {
                 throw new ConflictException("User is blocked");
             }
-        }catch (HttpStatusCodeException e) {
-            if(e.getStatusCode().equals(HttpStatus.NOT_FOUND)){
+        } catch (HttpStatusCodeException e) {
+            if (e.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
                 throw new ResourceNotFoundException("User not found");
             }
         }
-       return courseUserRepository.save(obj.convertToCourseUserModel(userId));
+        CourseUserModel courseUserModel = obj.convertToCourseUserModel(userId);
+        authUserClient.postSubscriptionUserInCourse(courseUserModel.getCourse().getCourseId(), courseUserModel.getUserId());
+        return courseUserRepository.save(courseUserModel);
     }
 
 }
