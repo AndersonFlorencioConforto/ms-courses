@@ -29,4 +29,9 @@ public class UtilsServiceImpl implements UtilsService {
     public String postSubscriptionUserInCourse(UUID userId) {
       return REQUEST_URL_AUTHUSER + "/users/" + userId + "/courses/subscription";
     }
+
+    @Override
+    public String deleteCourseInAuthUser(UUID courseId) {
+        return REQUEST_URL_AUTHUSER + "/users/courses/" + courseId;
+    }
 }

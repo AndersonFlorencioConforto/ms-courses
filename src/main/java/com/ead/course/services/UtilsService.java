@@ -9,4 +9,6 @@ public interface UtilsService {
     String getAllUsersByCourseId(UUID courseId, Pageable pageable);
     String findUserById(UUID userId);
     String postSubscriptionUserInCourse(UUID userId);
+
+    String deleteCourseInAuthUser(UUID courseId);
 }

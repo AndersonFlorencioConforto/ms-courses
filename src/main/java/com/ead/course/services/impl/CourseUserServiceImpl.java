@@ -54,4 +54,13 @@ public class CourseUserServiceImpl implements CourseUserService {
         return courseUserRepository.save(courseUserModel);
     }
 
+    @Transactional
+    @Override
+    public void delete(UUID userId) {
+        if (!courseUserRepository.existsByUserId(userId)){
+            throw new ResourceNotFoundException("CourseUser not found");
+        }
+        courseUserRepository.deleteAllByUserId(userId);
+    }
+
 }

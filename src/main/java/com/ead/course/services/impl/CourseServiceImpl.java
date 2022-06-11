@@ -1,5 +1,6 @@
 package com.ead.course.services.impl;
 
+import com.ead.course.client.AuthUserClient;
 import com.ead.course.dtos.CourseDTO;
 import com.ead.course.models.CourseModel;
 import com.ead.course.models.CourseUserModel;
@@ -34,11 +35,14 @@ public class CourseServiceImpl implements CourseService {
     private LessonRepository lessonRepository;
     @Autowired
     private CourseUserRepository courseUserRepository;
+    @Autowired
+    private AuthUserClient authUserClient;
 
 
     @Transactional
     @Override
     public void delete(UUID courseId) {
+        boolean deleteCourseUserInAuthUser = false;
         Optional<CourseModel> findById = courseRepository.findById(courseId);
         CourseModel courseModel = findById.orElseThrow(() -> new ResourceNotFoundException("Course Not found"));
         List<ModuleModel> modules = moduleRepository.findAllModulesIntoCourse(courseModel.getCourseId());
@@ -54,8 +58,12 @@ public class CourseServiceImpl implements CourseService {
         List<CourseUserModel> allCourseUserIntoCourse = courseUserRepository.findAllCourseUserIntoCourse(courseModel.getCourseId());
         if (!allCourseUserIntoCourse.isEmpty()) {
             courseUserRepository.deleteAll(allCourseUserIntoCourse);
+            deleteCourseUserInAuthUser = true;
         }
         courseRepository.delete(courseModel);
+        if (deleteCourseUserInAuthUser) {
+            authUserClient.deleteCourseInAuthUser(courseModel.getCourseId());
+        }
     }
 
     @Override
