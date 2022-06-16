@@ -1,11 +1,10 @@
 package com.ead.course.controllers;
 
-import com.ead.course.client.AuthUserClient;
 import com.ead.course.dtos.SubscriptionDTO;
 import com.ead.course.dtos.UserDTO;
-import com.ead.course.models.CourseUserModel;
+import com.ead.course.models.UserModel;
 import com.ead.course.services.CourseService;
-import com.ead.course.services.CourseUserService;
+import com.ead.course.services.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,13 +21,11 @@ import java.util.UUID;
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class CourseUserController {
 
-    private final AuthUserClient authUserClient;
-    private final CourseUserService courseUserService;
+    private final UserService userService;
     private final CourseService courseService;
 
-    public CourseUserController(AuthUserClient authUserClient, CourseUserService courseUserService, CourseService courseService) {
-        this.authUserClient = authUserClient;
-        this.courseUserService = courseUserService;
+    public CourseUserController(UserService userService, CourseService courseService) {
+        this.userService = userService;
         this.courseService = courseService;
     }
 
@@ -36,17 +33,12 @@ public class CourseUserController {
     @GetMapping("/courses/{courseId}/users")
     public ResponseEntity<Page<UserDTO>> getAllUsersByCourse(@PageableDefault(sort = "userId",direction = Sort.Direction.ASC)Pageable pageable, @PathVariable(value = "courseId") UUID courseId){
         courseService.findById(courseId);
-       return ResponseEntity.ok().body(authUserClient.getAllUsersByCourseId(courseId, pageable));
+       return ResponseEntity.ok().body(null); //todo arrumar
     }
 
     @PostMapping(("/courses/{courseId}/users/subscription"))
-    public ResponseEntity<CourseUserModel> saveSubscriptionUserInCourse(@PathVariable(value = "courseId") UUID courseId, @RequestBody @Valid SubscriptionDTO subscriptionDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(courseUserService.save(subscriptionDTO.getUserId(),courseId));
+    public ResponseEntity<UserModel> saveSubscriptionUserInCourse(@PathVariable(value = "courseId") UUID courseId, @RequestBody @Valid SubscriptionDTO subscriptionDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(null); //todo arrumar
     }
 
-    @DeleteMapping("/courses/users/{userId}")
-    public ResponseEntity<Void> deleteCourseUserByUser(@PathVariable(value = "userId") UUID userId){
-        courseUserService.delete(userId);
-        return ResponseEntity.noContent().build();
-    }
 }

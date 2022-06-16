@@ -1,15 +1,13 @@
 package com.ead.course.services.impl;
 
-import com.ead.course.client.AuthUserClient;
 import com.ead.course.dtos.CourseDTO;
 import com.ead.course.models.CourseModel;
-import com.ead.course.models.CourseUserModel;
 import com.ead.course.models.LessonModel;
 import com.ead.course.models.ModuleModel;
 import com.ead.course.repositories.CourseRepository;
-import com.ead.course.repositories.CourseUserRepository;
 import com.ead.course.repositories.LessonRepository;
 import com.ead.course.repositories.ModuleRepository;
+import com.ead.course.repositories.UserRepository;
 import com.ead.course.services.CourseService;
 import com.ead.course.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.BeanUtils;
@@ -34,15 +32,12 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private LessonRepository lessonRepository;
     @Autowired
-    private CourseUserRepository courseUserRepository;
-    @Autowired
-    private AuthUserClient authUserClient;
+    private UserRepository userRepository;
 
 
     @Transactional
     @Override
     public void delete(UUID courseId) {
-        boolean deleteCourseUserInAuthUser = false;
         Optional<CourseModel> findById = courseRepository.findById(courseId);
         CourseModel courseModel = findById.orElseThrow(() -> new ResourceNotFoundException("Course Not found"));
         List<ModuleModel> modules = moduleRepository.findAllModulesIntoCourse(courseModel.getCourseId());
@@ -52,18 +47,10 @@ public class CourseServiceImpl implements CourseService {
                 if (!lessons.isEmpty()) {
                     lessonRepository.deleteAll(lessons);
                 }
-                moduleRepository.deleteAll(modules);
+                moduleRepository.deleteAll(modules); //todo ponto de atenção caso n funcione,tirar do for
             }
         }
-        List<CourseUserModel> allCourseUserIntoCourse = courseUserRepository.findAllCourseUserIntoCourse(courseModel.getCourseId());
-        if (!allCourseUserIntoCourse.isEmpty()) {
-            courseUserRepository.deleteAll(allCourseUserIntoCourse);
-            deleteCourseUserInAuthUser = true;
-        }
         courseRepository.delete(courseModel);
-        if (deleteCourseUserInAuthUser) {
-            authUserClient.deleteCourseInAuthUser(courseModel.getCourseId());
-        }
     }
 
     @Override
