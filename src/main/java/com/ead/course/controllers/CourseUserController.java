@@ -1,7 +1,6 @@
 package com.ead.course.controllers;
 
 import com.ead.course.dtos.SubscriptionDTO;
-import com.ead.course.dtos.UserDTO;
 import com.ead.course.models.UserModel;
 import com.ead.course.services.CourseService;
 import com.ead.course.services.UserService;
@@ -31,7 +30,7 @@ public class CourseUserController {
 
 
     @GetMapping("/courses/{courseId}/users")
-    public ResponseEntity<Page<UserDTO>> getAllUsersByCourse(@PageableDefault(sort = "userId",direction = Sort.Direction.ASC)Pageable pageable, @PathVariable(value = "courseId") UUID courseId){
+    public ResponseEntity<Page<Object>> getAllUsersByCourse(@PageableDefault(sort = "userId",direction = Sort.Direction.ASC)Pageable pageable, @PathVariable(value = "courseId") UUID courseId){
         courseService.findById(courseId);
        return ResponseEntity.ok().body(null); //todo arrumar
     }
