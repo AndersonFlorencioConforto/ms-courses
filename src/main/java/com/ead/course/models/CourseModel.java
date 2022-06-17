@@ -23,16 +23,16 @@ import java.util.UUID;
 @Entity
 @Table(name = "TB_COURSE")
 public class CourseModel implements Serializable {
-    private static final long serialVersionUID= 1L;
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID courseId;
 
-    @Column(nullable = false,length = 150)
+    @Column(nullable = false, length = 150)
     private String name;
 
-    @Column(nullable = false,length = 250)
+    @Column(nullable = false, length = 250)
     private String description;
 
     @Column
@@ -60,9 +60,16 @@ public class CourseModel implements Serializable {
     private UUID userInstructor;
 
     //@OnDelete(action = OnDeleteAction.CASCADE) // responsabilidade do banco de dados e não do JPA
-    @OneToMany(mappedBy = "course",fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Fetch(FetchMode.SUBSELECT)
     private Set<ModuleModel> modules = new HashSet<>();
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "TB_COURSES_USES",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private Set<UserModel> users = new HashSet<>();
 
 }

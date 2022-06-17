@@ -4,6 +4,7 @@ import com.ead.course.dtos.SubscriptionDTO;
 import com.ead.course.models.UserModel;
 import com.ead.course.services.CourseService;
 import com.ead.course.services.UserService;
+import com.ead.course.specifications.SpecificationTemplate;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,9 +31,9 @@ public class CourseUserController {
 
 
     @GetMapping("/courses/{courseId}/users")
-    public ResponseEntity<Page<Object>> getAllUsersByCourse(@PageableDefault(sort = "userId",direction = Sort.Direction.ASC)Pageable pageable, @PathVariable(value = "courseId") UUID courseId){
+    public ResponseEntity<Page<UserModel>> getAllUsersByCourse(SpecificationTemplate.UserSpec spec, @PageableDefault(sort = "userId",direction = Sort.Direction.ASC)Pageable pageable, @PathVariable(value = "courseId") UUID courseId){
         courseService.findById(courseId);
-       return ResponseEntity.ok().body(null); //todo arrumar
+       return ResponseEntity.ok().body(userService.findAll(SpecificationTemplate.userCourseId(courseId).and(spec),pageable));
     }
 
     @PostMapping(("/courses/{courseId}/users/subscription"))
