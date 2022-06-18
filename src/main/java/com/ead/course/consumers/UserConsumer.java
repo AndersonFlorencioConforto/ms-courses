@@ -15,21 +15,25 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserConsumer {
 
-  private final UserService userService;
+    private final UserService userService;
 
     public UserConsumer(UserService userService) {
         this.userService = userService;
     }
 
-    @RabbitListener(bindings = @QueueBinding(value = @Queue (value = "${ead.broker.queue.userEventQueue.name}",durable = "true"),
-    exchange = @Exchange(value = "${ead.broker.exchange.userEvent}",type = ExchangeTypes.FANOUT,ignoreDeclarationExceptions = "true")))
-    public void listenUserEvent(@Payload UserEventPublisherDTO userEventPublisherDTO){
+    @RabbitListener(bindings = @QueueBinding(value = @Queue(value = "${ead.broker.queue.userEventQueue.name}", durable = "true"),
+            exchange = @Exchange(value = "${ead.broker.exchange.userEvent}", type = ExchangeTypes.FANOUT, ignoreDeclarationExceptions = "true")))
+    public void listenUserEvent(@Payload UserEventPublisherDTO userEventPublisherDTO) {
         UserModel userModel = userEventPublisherDTO.convertToUserModel();
 
-        switch (ActionType.valueOf(userEventPublisherDTO.getActionType())){
+        switch (ActionType.valueOf(userEventPublisherDTO.getActionType())) {
             case CREATE:
-               userService.save(userModel);
-               break;
+            case UPDATE:
+                userService.save(userModel);
+                break;
+            case DELETE:
+                userService.delete(userEventPublisherDTO.getUserId());
+                break;
         }
     }
 }
