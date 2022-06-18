@@ -22,6 +22,7 @@ public class RabbitMqConfig {
         return template;
     }
 
+    @Bean
     public Jackson2JsonMessageConverter messageConverter(){
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
