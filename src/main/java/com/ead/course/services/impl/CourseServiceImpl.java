@@ -1,14 +1,18 @@
 package com.ead.course.services.impl;
 
 import com.ead.course.dtos.CourseDTO;
+import com.ead.course.dtos.SubscriptionDTO;
 import com.ead.course.models.CourseModel;
 import com.ead.course.models.LessonModel;
 import com.ead.course.models.ModuleModel;
+import com.ead.course.models.UserModel;
+import com.ead.course.models.enums.UserStatus;
 import com.ead.course.repositories.CourseRepository;
 import com.ead.course.repositories.LessonRepository;
 import com.ead.course.repositories.ModuleRepository;
 import com.ead.course.repositories.UserRepository;
 import com.ead.course.services.CourseService;
+import com.ead.course.services.exceptions.ConflictException;
 import com.ead.course.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -82,5 +86,19 @@ public class CourseServiceImpl implements CourseService {
         course.setCourseStatus(courseDTO.getCourseStatus());
         course.setCourseLevel(courseDTO.getCourseLevel());
         return courseRepository.save(course);
+    }
+
+    @Transactional
+    @Override
+    public void saveSubscriptionUserInCourse(UUID courseId, SubscriptionDTO subscriptionDTO) {
+        CourseModel courseModel = courseRepository.findById(courseId).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        UserModel userModel = userRepository.findById(subscriptionDTO.getUserId()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        if (userModel.getUserStatus().equals(UserStatus.BLOCKED.toString())) {
+            throw new ConflictException("CONFLICT usuário bloqueado");
+        }
+        if (courseRepository.existsByCourseAndUser(courseId,subscriptionDTO.getUserId())){
+            throw new ConflictException("CONFLICT usuário já cadastrado no CURSO");
+        }
+        courseRepository.saveCourseUser(courseModel.getCourseId(),userModel.getUserId());
     }
 }

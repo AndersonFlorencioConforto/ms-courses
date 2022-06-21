@@ -3,10 +3,8 @@ package com.ead.course.controllers;
 import com.ead.course.dtos.CourseDTO;
 import com.ead.course.models.CourseModel;
 import com.ead.course.services.CourseService;
-import com.ead.course.services.exceptions.ResourceNotFoundException;
 import com.ead.course.specifications.SpecificationTemplate;
 import com.ead.course.validation.CourseValidator;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
