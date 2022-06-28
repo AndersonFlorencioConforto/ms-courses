@@ -1,12 +1,14 @@
 package com.ead.course.services.impl;
 
 import com.ead.course.dtos.CourseDTO;
+import com.ead.course.dtos.NotificationCommandDTO;
 import com.ead.course.dtos.SubscriptionDTO;
 import com.ead.course.models.CourseModel;
 import com.ead.course.models.LessonModel;
 import com.ead.course.models.ModuleModel;
 import com.ead.course.models.UserModel;
 import com.ead.course.models.enums.UserStatus;
+import com.ead.course.publishers.NotificationCommandPublisher;
 import com.ead.course.repositories.CourseRepository;
 import com.ead.course.repositories.LessonRepository;
 import com.ead.course.repositories.ModuleRepository;
@@ -14,6 +16,8 @@ import com.ead.course.repositories.UserRepository;
 import com.ead.course.services.CourseService;
 import com.ead.course.services.exceptions.ConflictException;
 import com.ead.course.services.exceptions.ResourceNotFoundException;
+import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,11 +25,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Log4j2
 @Service
 public class CourseServiceImpl implements CourseService {
 
@@ -37,6 +41,8 @@ public class CourseServiceImpl implements CourseService {
     private LessonRepository lessonRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private NotificationCommandPublisher notificationCommandPublisher;
 
 
     @Transactional
@@ -101,5 +107,15 @@ public class CourseServiceImpl implements CourseService {
             throw new ConflictException("CONFLICT usuário já cadastrado no CURSO");
         }
         courseRepository.saveCourseUser(courseModel.getCourseId(),userModel.getUserId());
+
+        try {
+            NotificationCommandDTO notificationCommandDTO = new NotificationCommandDTO();
+            notificationCommandDTO.setTitle("Bem-vindo(a) ao curso: " + courseModel.getName());
+            notificationCommandDTO.setMessage(userModel.getFullName() + " a sua inscrição foi realizada com sucesso");
+            notificationCommandDTO.setUserId(userModel.getUserId());
+            notificationCommandPublisher.publishNotificationCommand(notificationCommandDTO);
+        }catch (RuntimeException e) {
+            log.warn("Error sending notification!");
+        }
     }
 }
